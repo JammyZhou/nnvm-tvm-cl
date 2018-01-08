@@ -50,22 +50,29 @@ graph, lib, params = nnvm.compiler.build(sym, target, shape_dict, params=params,
 
 # Save the library at local temporary directory.
 tmp = util.tempdir()
-lib_fname = tmp.relpath('sym.o')
-lib.save(lib_fname)
+path_o = tmp.relpath('sym.o')
+path_cl = tmp.relpath('sym.cl')
+path_json = tmp.relpath('sym.tvm_meta.json')
+lib.save(path_o)
+lib.imported_modules[0].save(path_cl)
 
 # connect the server
 remote = rpc.connect('192.168.1.14', 9090)
 
 # upload the library to remote device and load it
-remote.upload(lib_fname)
-rlib = remote.load_module('sym.o')
+remote.upload(path_o)
+remote.upload(path_cl)
+remote.upload(path_json)
+fhost = remote.load_module('sym.o')
+fdev = remote.load_module('sym.cl')
+fhost.import_module(fdev)
 
 from tvm.contrib import graph_runtime
 ctx = remote.cl(0)
 # upload the parameter
 rparams = {k: tvm.nd.array(v, ctx) for k, v in params.items()}
 dtype = 'float32'
-m = graph_runtime.create(graph, rlib, ctx)
+m = graph_runtime.create(graph, fhost, ctx)
 # set inputs
 m.set_input('data', tvm.nd.array(x.astype(dtype)))
 m.set_input(**rparams)
