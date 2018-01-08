@@ -72,6 +72,6 @@ m.set_input(**rparams)
 # execute
 m.run()
 # get outputs
-tvm_output = m.get_output(0, tvm.nd.empty((1000,), dtype))
+tvm_output = m.get_output(0, tvm.nd.empty((1000,), dtype, ctx=ctx))
 top1 = np.argmax(tvm_output.asnumpy())
 print('TVM prediction top-1:', top1, synset[top1])
