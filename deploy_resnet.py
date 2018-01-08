@@ -3,6 +3,10 @@ import nnvm
 import tvm
 import numpy as np
 
+# Use "Agg" backend of matplotlib to make it work with ssh
+import matplotlib
+matplotlib.use('Agg')
+
 from mxnet.gluon.model_zoo.vision import get_model
 from mxnet.gluon.utils import download
 from PIL import Image
