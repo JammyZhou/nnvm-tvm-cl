@@ -43,9 +43,12 @@ sym, params = nnvm.frontend.from_mxnet(block)
 sym = nnvm.sym.softmax(sym)
 
 import nnvm.compiler
+#mali target can be used for mali specific schedule
+#target = tvm.target.mali()
 target = 'opencl'
 target_host = 'llvm -target=aarch64-linux-gnu -mcpu=cortex-a53 -mattr=+neon'
 shape_dict = {'data': x.shape}
+
 graph, lib, params = nnvm.compiler.build(sym, target, shape_dict, params=params, target_host=target_host)
 
 # Save the library at local temporary directory.

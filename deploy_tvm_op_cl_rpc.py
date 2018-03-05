@@ -13,7 +13,10 @@ s = tvm.create_schedule(B.op)
 xo, xi = s[B].split(B.op.axis[0], factor=32)
 s[B].bind(xo, tvm.thread_axis("blockIdx.x"))
 s[B].bind(xi, tvm.thread_axis("threadIdx.x"))
-f = tvm.build(s, [A, B], "opencl", target_host="llvm -mtriple=aarch64-linux-gnu -mcpu=cortex-a53 -mattr=+neon", name="myadd")
+#mali target can be used for mali specific schedule
+#target = tvm.target.mali()
+target = "opencl"
+f = tvm.build(s, [A, B], target, target_host="llvm -mtriple=aarch64-linux-gnu -mcpu=cortex-a53 -mattr=+neon", name="myadd")
 print(f.imported_modules[0].get_source())
 
 # save files
